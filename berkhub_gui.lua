@@ -73,11 +73,20 @@ ToggleButton.TextStrokeColor3 = Color3.new(0, 0, 0)
 -- Speed sistemi
 local active = true
 local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
 local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
+local camera = workspace.CurrentCamera
 
 local lastJumpTime = 0
 local jumpCount = 0
+
+-- ShiftLock kontrol
+local function isShiftLockOn()
+    return (camera.CameraType == Enum.CameraType.Custom and
+            player.DevEnableMouseLock and
+            player.DevComputerMovementMode == Enum.DevComputerMovementMode.MouseLockSwitch)
+end
 
 -- Zıplama kontrol fonksiyonu
 local function handleJump()
@@ -91,10 +100,10 @@ local function handleJump()
     end
     lastJumpTime = now
 
-    if jumpCount >= 2 then
-        humanoid.WalkSpeed = 16 -- spam zıplama -> yavaşlat
+    if isShiftLockOn() and jumpCount < 2 then
+        humanoid.WalkSpeed = 40 -- sadece shiftlock açıkken ve spam yapmadan
     else
-        humanoid.WalkSpeed = 40 -- normal zıplama -> hızlan
+        humanoid.WalkSpeed = 16
     end
 end
 
@@ -104,7 +113,7 @@ humanoid.StateChanged:Connect(function(_, newState)
         handleJump()
     elseif newState == Enum.HumanoidStateType.Landed then
         if active then
-            humanoid.WalkSpeed = 16 -- inişte hız sıfırla
+            humanoid.WalkSpeed = 16
         end
     end
 end)
