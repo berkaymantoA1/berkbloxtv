@@ -33,7 +33,7 @@ Title.TextSize = 20
 Title.TextStrokeTransparency = 0
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Alt Başlık (YouTube: BerkHubRoblox - Küçük rainbow)
+-- Alt Başlık
 Subtitle.Name = "Subtitle"
 Subtitle.Parent = Frame
 Subtitle.BackgroundTransparency = 1
@@ -45,7 +45,7 @@ Subtitle.TextSize = 13
 Subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 Subtitle.TextStrokeTransparency = 0.2
 
--- Rainbow efekt (başlık + alt başlık)
+-- Rainbow efekt
 spawn(function()
     while true do
         local hue = tick() % 5 / 5
@@ -70,27 +70,46 @@ ToggleButton.AutoButtonColor = true
 ToggleButton.TextStrokeTransparency = 0.3
 ToggleButton.TextStrokeColor3 = Color3.new(0, 0, 0)
 
--- Script fonksiyonları
+-- Speed sistemi
 local active = true
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
 
--- Speed kontrol
-local runService = game:GetService("RunService")
-runService.RenderStepped:Connect(function()
-    if active then
-        if humanoid:GetState() == Enum.HumanoidStateType.Jumping then
-            humanoid.WalkSpeed = 40
-        else
-            humanoid.WalkSpeed = 16
-        end
+local lastJumpTime = 0
+local jumpCount = 0
+
+-- Zıplama kontrol fonksiyonu
+local function handleJump()
+    if not active then return end
+
+    local now = tick()
+    if now - lastJumpTime < 0.5 then
+        jumpCount += 1
     else
-        humanoid.WalkSpeed = 16
+        jumpCount = 1
+    end
+    lastJumpTime = now
+
+    if jumpCount >= 2 then
+        humanoid.WalkSpeed = 16 -- spam zıplama -> yavaşlat
+    else
+        humanoid.WalkSpeed = 40 -- normal zıplama -> hızlan
+    end
+end
+
+-- Humanoid durum değişikliği
+humanoid.StateChanged:Connect(function(_, newState)
+    if newState == Enum.HumanoidStateType.Jumping then
+        handleJump()
+    elseif newState == Enum.HumanoidStateType.Landed then
+        if active then
+            humanoid.WalkSpeed = 16 -- inişte hız sıfırla
+        end
     end
 end)
 
--- Buton işlemi
+-- Buton kontrolü
 ToggleButton.MouseButton1Click:Connect(function()
     active = not active
     if active then
@@ -99,11 +118,22 @@ ToggleButton.MouseButton1Click:Connect(function()
     else
         ToggleButton.Text = "Close"
         ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        humanoid.WalkSpeed = 16
     end
 end)
 
--- Spawn sonrası humanoid güncelle
+-- Yeni karakter doğduğunda
 player.CharacterAdded:Connect(function(c)
     char = c
     humanoid = c:WaitForChild("Humanoid")
+
+    humanoid.StateChanged:Connect(function(_, newState)
+        if newState == Enum.HumanoidStateType.Jumping then
+            handleJump()
+        elseif newState == Enum.HumanoidStateType.Landed then
+            if active then
+                humanoid.WalkSpeed = 16
+            end
+        end
+    end)
 end)
