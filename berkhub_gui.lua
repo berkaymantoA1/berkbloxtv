@@ -8,6 +8,7 @@ local Title = Instance.new("TextLabel")
 local Subtitle = Instance.new("TextLabel")
 local ToggleButton = Instance.new("TextButton")
 local StatusLabel = Instance.new("TextLabel")
+local CollapseButton = Instance.new("TextButton")
 
 -- Frame Ayarları
 Frame.Name = "MainFrame"
@@ -83,8 +84,23 @@ StatusLabel.TextStrokeTransparency = 0.3
 StatusLabel.Text = "Speed Glitch is not active"
 StatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 
+-- Küçült/Aç butonu
+CollapseButton.Name = "CollapseButton"
+CollapseButton.Parent = Frame
+CollapseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+CollapseButton.Position = UDim2.new(1, -20, 0, 0)
+CollapseButton.Size = UDim2.new(0, 20, 0, 20)
+CollapseButton.Text = "-"
+CollapseButton.TextColor3 = Color3.new(1, 1, 1)
+CollapseButton.Font = Enum.Font.GothamBold
+CollapseButton.TextSize = 14
+CollapseButton.BorderSizePixel = 0
+CollapseButton.AutoButtonColor = true
+CollapseButton.TextStrokeTransparency = 0.4
+
 -- Script fonksiyonları
 local active = false
+local collapsed = false
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
@@ -106,7 +122,7 @@ end
 
 connectStateListener(humanoid)
 
--- Buton işlemi
+-- ToggleButton işlemi
 ToggleButton.MouseButton1Click:Connect(function()
     active = not active
     if active then
@@ -128,4 +144,27 @@ player.CharacterAdded:Connect(function(c)
     char = c
     humanoid = c:WaitForChild("Humanoid")
     connectStateListener(humanoid)
+end)
+
+-- Animasyonlu Aç/Kapat işlemi
+local fullSize = UDim2.new(0, 200, 0, 140)
+local collapsedSize = UDim2.new(0, 200, 0, 36)
+
+CollapseButton.MouseButton1Click:Connect(function()
+    collapsed = not collapsed
+    if collapsed then
+        Frame:TweenSize(collapsedSize, "Out", "Sine", 0.4, true)
+        for _, child in pairs(Frame:GetChildren()) do
+            if child ~= Title and child ~= CollapseButton then
+                child.Visible = false
+            end
+        end
+    else
+        Frame:TweenSize(fullSize, "Out", "Sine", 0.4, true)
+        task.delay(0.4, function()
+            for _, child in pairs(Frame:GetChildren()) do
+                child.Visible = true
+            end
+        end)
+    end
 end)
