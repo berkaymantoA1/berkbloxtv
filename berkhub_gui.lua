@@ -1,5 +1,5 @@
 -- BerkHub MM2 Speed GUI
--- Arcues X Uyumlu
+-- Arcues X Delta Fluxus Codex 
 
 -- GUI Oluştur
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
@@ -146,13 +146,17 @@ player.CharacterAdded:Connect(function(c)
     connectStateListener(humanoid)
 end)
 
--- Animasyonlu Aç/Kapat işlemi
+-- Animasyonlu Aç/Kapat işlemi (Title ortalanmış)
 local fullSize = UDim2.new(0, 200, 0, 140)
 local collapsedSize = UDim2.new(0, 200, 0, 36)
 
 CollapseButton.MouseButton1Click:Connect(function()
     collapsed = not collapsed
     if collapsed then
+        -- Başlığı ortala
+        Title.Position = UDim2.new(0, 0, 0, 8)
+        Title.Size = UDim2.new(1, 0, 0, 20)
+
         Frame:TweenSize(collapsedSize, "Out", "Sine", 0.4, true)
         for _, child in pairs(Frame:GetChildren()) do
             if child ~= Title and child ~= CollapseButton then
@@ -160,6 +164,10 @@ CollapseButton.MouseButton1Click:Connect(function()
             end
         end
     else
+        -- Başlığı eski haline döndür
+        Title.Position = UDim2.new(0, 0, 0, 0)
+        Title.Size = UDim2.new(1, 0, 0.3, 0)
+
         Frame:TweenSize(fullSize, "Out", "Sine", 0.4, true)
         task.delay(0.4, function()
             for _, child in pairs(Frame:GetChildren()) do
