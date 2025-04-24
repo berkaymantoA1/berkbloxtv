@@ -89,19 +89,22 @@ local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
 
--- Speed kontrol
-local runService = game:GetService("RunService")
-runService.RenderStepped:Connect(function()
-    if active then
-        if humanoid:GetState() == Enum.HumanoidStateType.Jumping then
-            humanoid.WalkSpeed = 40
+-- Speed kontrol (StateChanged kullanılarak)
+local function connectStateListener(h)
+    h.StateChanged:Connect(function(_, newState)
+        if active then
+            if newState == Enum.HumanoidStateType.Jumping or newState == Enum.HumanoidStateType.Freefall then
+                h.WalkSpeed = 40
+            else
+                h.WalkSpeed = 16
+            end
         else
-            humanoid.WalkSpeed = 16
+            h.WalkSpeed = 16
         end
-    else
-        humanoid.WalkSpeed = 16
-    end
-end)
+    end)
+end
+
+connectStateListener(humanoid)
 
 -- Buton işlemi
 ToggleButton.MouseButton1Click:Connect(function()
@@ -116,11 +119,13 @@ ToggleButton.MouseButton1Click:Connect(function()
         ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
         StatusLabel.Text = "Speed Glitch is not active"
         StatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        humanoid.WalkSpeed = 16
     end
 end)
 
--- Spawn sonrası humanoid güncelle
+-- Karakter tekrar spawn olunca yeniden bağlan
 player.CharacterAdded:Connect(function(c)
     char = c
     humanoid = c:WaitForChild("Humanoid")
+    connectStateListener(humanoid)
 end)
